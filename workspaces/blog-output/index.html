@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How Hermes Agent's Sub-Agent Delegation Works</title>
+    <style>
+        :root {
+            --bg-primary: #0d1117;
+            --bg-secondary: #161b22;
+            --bg-tertiary: #21262d;
+            --text-primary: #e6edf3;
+            --text-secondary: #8b949e;
+            --text-muted: #6e7681;
+            --accent: #58a6ff;
+            --accent-green: #3fb950;
+            --accent-orange: #d29922;
+            --accent-red: #f85149;
+            --accent-purple: #bc8cff;
+            --border: #30363d;
+            --code-bg: #1c2128;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+            font-size: 16px;
+        }
+
+        .container {
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* Header / Hero */
+        .hero {
+            background: linear-gradient(180deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
+            border-bottom: 1px solid var(--border);
+            padding: 80px 0 60px;
+            text-align: center;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 4px 14px;
+            font-size: 13px;
+            color: var(--accent);
+            margin-bottom: 24px;
+            font-weight: 500;
+        }
+
+        .hero h1 {
+            font-size: 42px;
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 16px;
+            letter-spacing: -0.5px;
+        }
+
+        .hero h1 .highlight {
+            color: var(--accent);
+        }
+
+        .hero-subtitle {
+            font-size: 19px;
+            color: var(--text-secondary);
+            max-width: 640px;
+            margin: 0 auto 32px;
+            line-height: 1.6;
+        }
+
+        .hero-meta {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        .hero-meta span {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Table of Contents */
+        .toc {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 28px 32px;
+            margin: 48px 0;
+        }
+
+        .toc h2 {
+            font-size: 18px;
+            margin-bottom: 16px;
+            color: var(--text-primary);
+        }
+
+        .toc ol {
+            list-style: none;
+            counter-reset: toc-counter;
+        }
+
+        .toc li {
+            counter-increment: toc-counter;
+            padding: 6px 0;
+        }
+
+        .toc li::before {
+            content: counter(toc-counter) ". ";
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .toc a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .toc a:hover {
+            color: var(--accent);
+        }
+
+        /* Main Content */
+        .content {
+            padding-bottom: 80px;
+        }
+
+        .content h2 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-top: 56px;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+            letter-spacing: -0.3px;
+        }
+
+        .content h3 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-top: 36px;
+            margin-bottom: 12px;
+            color: var(--text-primary);
+        }
+
+        .content p {
+            margin-bottom: 18px;
+            color: var(--text-secondary);
+        }
+
+        .content strong {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .content a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        .content a:hover {
+            text-decoration: underline;
+        }
+
+        /* Code Blocks */
+        pre {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px 24px;
+            overflow-x: auto;
+            margin: 20px 0;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        code {
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+        }
+
+        p code, li code {
+            background: var(--bg-tertiary);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 14px;
+            color: var(--accent-purple);
+        }
+
+        pre code {
+            color: var(--text-primary);
+        }
+
+        /* Callout Boxes */
+        .callout {
+            border-left: 4px solid var(--accent);
+            background: var(--bg-secondary);
+            border-radius: 0 8px 8px 0;
+            padding: 16px 20px;
+            margin: 24px 0;
+        }
+
+        .callout.warning {
+            border-left-color: var(--accent-orange);
+        }
+
+        .callout.success {
+            border-left-color: var(--accent-green);
+        }
+
+        .callout.danger {
+            border-left-color: var(--accent-red);
+        }
+
+        .callout p:last-child {
+            margin-bottom: 0;
+        }
+
+        .callout-title {
+            font-weight: 600;
+            margin-bottom: 6px;
+            font-size: 15px;
+        }
+
+        .callout.warning .callout-title { color: var(--accent-orange); }
+        .callout.success .callout-title { color: var(--accent-green); }
+        .callout.danger .callout-title { color: var(--accent-red); }
+        .callout .callout-title { color: var(--accent); }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 24px 0;
+            font-size: 14px;
+        }
+
+        th {
+            background: var(--bg-tertiary);
+            text-align: left;
+            padding: 12px 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            border-bottom: 2px solid var(--border);
+        }
+
+        td {
+            padding: 10px 16px;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-secondary);
+        }
+
+        tr:hover td {
+            background: var(--bg-secondary);
+        }
+
+        /* Lists */
+        .content ul, .content ol {
+            margin: 16px 0 20px 24px;
+            color: var(--text-secondary);
+        }
+
+        .content li {
+            margin-bottom: 8px;
+        }
+
+        /* Architecture Diagram (ASCII-style) */
+        .diagram {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 24px;
+            margin: 24px 0;
+            font-family: 'SFMono-Regular', Consolas, monospace;
+            font-size: 13px;
+            line-height: 1.8;
+            overflow-x: auto;
+            color: var(--text-secondary);
+        }
+
+        .diagram .agent { color: var(--accent); font-weight: 600; }
+        .diagram .sub { color: var(--accent-green); }
+        .diagram .tool { color: var(--accent-orange); }
+        .diagram .arrow { color: var(--text-muted); }
+
+        /* Comparison Cards */
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 24px 0;
+        }
+
+        .comparison-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 24px;
+        }
+
+        .comparison-card h4 {
+            font-size: 16px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .comparison-card.subagent h4 { color: var(--accent-green); }
+        .comparison-card.profile h4 { color: var(--accent-purple); }
+
+        .comparison-card ul {
+            margin: 0;
+            padding-left: 20px;
+            font-size: 14px;
+        }
+
+        .comparison-card li {
+            margin-bottom: 6px;
+        }
+
+        /* Footer */
+        .footer {
+            border-top: 1px solid var(--border);
+            padding: 40px 0;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .footer a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 30px; }
+            .hero-subtitle { font-size: 16px; }
+            .comparison-grid { grid-template-columns: 1fr; }
+            .hero-meta { flex-direction: column; gap: 8px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Hero Section -->
+<div class="hero">
+    <div class="container">
+        <div class="hero-badge">Technical Deep Dive</div>
+        <h1>How Hermes Agent's <span class="highlight">Sub-Agent Delegation</span> Works</h1>
+        <p class="hero-subtitle">
+            A comprehensive look at how Hermes Agent spawns isolated child agents to work in parallel,
+            keeps context windows clean, and orchestrates complex multi-step workflows.
+        </p>
+        <div class="hero-meta">
+            <span>By Hermes Agent Team</span>
+            <span>&middot;</span>
+            <span>June 2026</span>
+            <span>&middot;</span>
+            <span>~12 min read</span>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Table of Contents -->
+    <nav class="toc">
+        <h2>Table of Contents</h2>
+        <ol>
+            <li><a href="#what-are-subagents">What Are Sub-Agents?</a></li>
+            <li><a href="#delegate-task">How <code>delegate_task</code> Works</a></li>
+            <li><a href="#isolated-context">The Isolated Context Model</a></li>
+            <li><a href="#parallel-execution">Parallel Execution &amp; Concurrency</a></li>
+            <li><a href="#handoff-patterns">Handoff Patterns &amp; Shared Workspaces</a></li>
+            <li><a href="#profiles-vs-subagents">Profiles vs. Sub-Agents: When to Use Which</a></li>
+            <li><a href="#real-world-use-cases">Real-World Use Cases</a></li>
+            <li><a href="#pitfalls">Pitfalls &amp; Best Practices</a></li>
+            <li><a href="#conclusion">Conclusion</a></li>
+        </ol>
+    </nav>
+
+    <!-- Main Content -->
+    <article class="content">
+
+        <h2 id="what-are-subagents">1. What Are Sub-Agents?</h2>
+
+        <p>
+            In Hermes Agent, a <strong>sub-agent</strong> is a child AI agent instance spawned by a parent agent to work on a specific task independently. Think of it as the parent agent hiring a specialized contractor: the contractor gets a clear brief, does the work in their own space, and returns only the final result.
+        </p>
+
+        <p>
+            Sub-agents are created using the <code>delegate_task</code> tool. Each sub-agent receives:
+        </p>
+
+        <ul>
+            <li>A <strong>fresh conversation</strong> — zero knowledge of the parent's history</li>
+            <li>Its own <strong>terminal session</strong> for running commands</li>
+            <li>A <strong>restricted toolset</strong> chosen by the parent (e.g., only <code>["web"]</code> or <code>["terminal", "file"]</code>)</li>
+            <li>Only the <strong>goal and context</strong> explicitly passed by the parent</li>
+        </ul>
+
+        <div class="callout">
+            <div class="callout-title">Key Insight</div>
+            <p>
+                Only the sub-agent's <strong>final summary</strong> enters the parent's context window. All intermediate tool calls, searches, and reasoning steps stay isolated. This is the single most important architectural benefit of sub-agent delegation.
+            </p>
+        </div>
+
+        <p>
+            This design solves a fundamental problem in AI agent systems: <strong>context window pollution</strong>. When a single agent performs a complex multi-step task, every intermediate tool call, search result, and reasoning step accumulates in the context window. This degrades performance, increases costs, and can cause the agent to lose track of its original objective. Sub-agents keep the parent's context clean by absorbing all that intermediate work.
+        </p>
+
+        <h2 id="delegate-task">2. How <code>delegate_task</code> Works</h2>
+
+        <p>
+            The <code>delegate_task</code> tool is the primary mechanism for spawning sub-agents. It supports two modes: <strong>single task</strong> and <strong>parallel batch</strong>.
+        </p>
+
+        <h3>Single Task Mode</h3>
+
+        <p>
+            For straightforward delegation, you pass a single goal, optional context, and a toolset:
+        </p>
+
+        <pre><code>delegate_task(
+    goal="Debug why the test suite fails on line 42 of test_foo.py",
+    context="Error: AssertionError in test_foo.py line 42. The project is at /home/user/myproject and uses Python 3.11 with pytest.",
+    toolsets=["terminal", "file"]
+)</code></pre>
+
+        <p>
+            The parent agent calls <code>delegate_task</code>, and the sub-agent begins working immediately. The parent's turn blocks until the sub-agent completes and returns its summary.
+        </p>
+
+        <h3>Parallel Batch Mode</h3>
+
+        <p>
+            For multiple independent tasks, pass an array of task objects. They run concurrently:
+        </p>
+
+        <pre><code>delegate_task(tasks=[
+    {
+        "goal": "Research the current state of WebAssembly in 2025",
+        "context": "Focus on: browser support, non-browser runtimes, language support",
+        "toolsets": ["web"]
+    },
+    {
+        "goal": "Research RISC-V server chip adoption in 2025",
+        "context": "Focus on: server chips shipping, cloud providers, software ecosystem",
+        "toolsets": ["web"]
+    },
+    {
+        "goal": "Research quantum computing progress in 2025",
+        "context": "Focus on: error correction, practical applications, key players",
+        "toolsets": ["web"]
+    }
+])</code></pre>
+
+        <p>
+            By default, up to <strong>3 sub-agents run concurrently</strong>. This limit is configurable via <code>delegation.max_concurrent_children</code> in <code>config.yaml</code> or the <code>DELEGATION_MAX_CONCURRENT_CHILDREN</code> environment variable. There is no hard ceiling — you can increase it as needed.
+        </p>
+
+        <h3>Model Override</h3>
+
+        <p>
+            You can route sub-agents to a different (often cheaper or faster) model:
+        </p>
+
+        <pre><code># In ~/.hermes/config.yaml
+delegation:
+  model: "google/gemini-flash-2.0"
+  provider: "openrouter"</code></pre>
+
+        <p>
+            This is particularly useful for delegating simple research or formatting tasks to fast models while reserving the parent's powerful model for synthesis and decision-making.
+        </p>
+
+        <h2 id="isolated-context">3. The Isolated Context Model</h2>
+
+        <p>
+            The most critical concept in sub-agent delegation is <strong>context isolation</strong>. When a sub-agent is spawned, it starts with a completely fresh conversation. It has:
+        </p>
+
+        <ul>
+            <li><strong>Zero knowledge</strong> of the parent's conversation history</li>
+            <li><strong>No access</strong> to prior tool calls or their results</li>
+            <li><strong>No awareness</strong> of what the parent was discussing before delegation</li>
+            <li><strong>Only</strong> the <code>goal</code> and <code>context</code> fields passed by the parent</li>
+        </ul>
+
+        <div class="callout warning">
+            <div class="callout-title">The Context Problem</div>
+            <p>
+                If you delegate "fix the bug we were discussing," the subagent has <strong>no idea</strong> what bug you mean. You must pass file paths, error messages, project structure, and constraints explicitly. The sub-agent cannot see your screen, your prior messages, or your intentions — only what you write in the goal and context fields.
+            </p>
+        </div>
+
+        <p>
+            This isolation is a feature, not a limitation. It means:
+        </p>
+
+        <ul>
+            <li><strong>No bias carryover</strong> — the sub-agent approaches the task fresh, without being influenced by the parent's earlier reasoning</li>
+            <li><strong>Clean context windows</strong> — the parent's context stays focused on high-level orchestration</li>
+            <li><strong>Parallel safety</strong> — multiple sub-agents can't accidentally share state or interfere with each other</li>
+            <li><strong>Deterministic inputs</strong> — the sub-agent's behavior is fully determined by what the parent passes, making delegation reproducible</li>
+        </ul>
+
+        <h2 id="parallel-execution">4. Parallel Execution &amp; Concurrency</h2>
+
+        <p>
+            When running multiple sub-agents in batch mode, Hermes uses a <code>ThreadPoolExecutor</code> with the configured concurrency limit as max workers. Here's what happens under the hood:
+        </p>
+
+        <div class="diagram">
+            <span class="agent">[Parent Agent]</span>
+                <span class="arrow">  │</span>
+                <span class="arrow">  ├─ delegate_task(tasks=[T1, T2, T3])</span>
+                <span class="arrow">  │</span>
+                <span class="arrow">  ▼</span>
+            <span class="agent">[ThreadPoolExecutor]</span> <span class="arrow">(max_workers=3)</span>
+                <span class="arrow">  ├──────────────────┬──────────────────┐</span>
+                <span class="arrow">  ▼                  ▼                  ▼</span>
+            <span class="sub">[Sub-Agent 1]</span>    <span class="sub">[Sub-Agent 2]</span>    <span class="sub">[Sub-Agent 3]</span>
+            <span class="tool">  toolsets: [web]</span>  <span class="tool">  toolsets: [web]</span>  <span class="tool">  toolsets: [web]</span>
+                <span class="arrow">  │                  │                  │</span>
+                <span class="arrow">  ▼                  ▼                  ▼</span>
+            <span class="agent">[Results sorted by task index]</span>
+                <span class="arrow">  │</span>
+                <span class="arrow">  ▼</span>
+            <span class="agent">[Parent synthesizes summaries]</span>
+        </div>
+
+        <p>
+            Key behaviors:
+        </p>
+
+        <ul>
+            <li><strong>Results are sorted by task index</strong> — regardless of which sub-agent finishes first, results are returned in the same order as the input array</li>
+            <li><strong>Interrupt propagation</strong> — if the parent is interrupted (e.g., Ctrl+C), all active children are cancelled and their work is discarded</li>
+            <li><strong>CLI progress display</strong> — in terminal mode, a tree-view shows tool calls from each sub-agent in real-time</li>
+            <li><strong>Synchronous by default</strong> — <code>delegate_task</code> blocks the parent turn until all children complete</li>
+        </ul>
+
+        <div class="callout danger">
+            <div class="callout-title">Synchronous = Interruptible</div>
+            <p>
+                Because <code>delegate_task</code> is synchronous, if the parent turn is interrupted, all active children are cancelled and their work is lost. For durable long-running work, consider using <code>terminal(background=True, notify_on_complete=True)</code> or cron jobs instead.
+            </p>
+        </div>
+
+        <h2 id="handoff-patterns">5. Handoff Patterns &amp; Shared Workspaces</h2>
+
+        <p>
+            For complex multi-step workflows, sub-agents need to pass work products to each other. Hermes supports this through the <strong>shared workspace pattern</strong>, where sub-agents read predecessor outputs from and write their own outputs to a shared directory.
+        </p>
+
+        <h3>The Pipeline-as-Code Pattern</h3>
+
+        <p>
+            The <code>multi-agent-pipeline</code> skill demonstrates a full pipeline-as-code approach. Workflows are defined as markdown files with dependency graphs:
+        </p>
+
+        <pre><code># Task Graph
+T1 (researcher) → T2 (analyst) → T3,T4,T5,T6,T7 (writer, parallel) → T8 (reviewer) → T9 (writer)
+
+# Dependency Levels
+Level 0: T1          (no deps, starts immediately)
+Level 1: T2          (needs T1)
+Level 2: T3-T7       (needs T2, all run in parallel)
+Level 3: T8          (needs all of T3-T7)
+Level 4: T9          (needs T8)</code></pre>
+
+        <h3>Shared Workspace Structure</h3>
+
+        <p>
+            Each sub-agent reads from and writes to a shared workspace directory:
+        </p>
+
+        <pre><code>workspaces/my-pipeline/
+├── T1_output.md          # Research brief
+├── T1_handoff.json       # Structured metadata
+├── T2_output.md          # Messaging framework
+├── T2_handoff.json
+├── T3_output.md          # Landing page copy
+├── ...
+├── T8_output.md          # Review report
+├── T8_handoff.json       # Issues list
+├── T4_final.md           # Fixed email sequence
+└── T9_changelog.md       # What changed and why</code></pre>
+
+        <h3>Handoff JSON Format</h3>
+
+        <p>
+            Each sub-agent writes a structured handoff file that downstream agents can consume:
+        </p>
+
+        <pre><code>{
+    "task_id": "T3",
+    "status": "complete",
+    "summary": "Landing page copy written, 487 words, focuses on pain points from T1 research",
+    "output_file": "T3_output.md",
+    "metadata": {
+        "word_count": 487,
+        "key_messages": ["speed", "reliability", "developer experience"],
+        "sources_cited": 3
+    }
+}</code></pre>
+
+        <h3>Review-Revise Loop</h3>
+
+        <p>
+            A common pattern includes a reviewer task that reads all content outputs, compares them against the source of truth (e.g., a messaging framework), and either passes or requests revisions. If revisions are requested, a finalizer task patches the flagged files and produces a changelog.
+        </p>
+
+        <h2 id="profiles-vs-subagents">6. Profiles vs. Sub-Agents: When to Use Which</h2>
+
+        <p>
+            Hermes Agent offers two forms of agent isolation: <strong>profiles</strong> and <strong>sub-agents</strong>. They serve different purposes and are not interchangeable.
+        </p>
+
+        <div class="comparison-grid">
+            <div class="comparison-card subagent">
+                <h4>Sub-Agents</h4>
+                <ul>
+                    <li>Ephemeral — exist for one task, then disappear</li>
+                    <li>Spawned dynamically by <code>delegate_task</code></li>
+                    <li>Fresh context every time</li>
+                    <li>Restricted toolset chosen by parent</li>
+                    <li>Return only a final summary</li>
+                    <li>Share the parent's filesystem and state directory</li>
+                    <li>Ideal for: parallel work, context isolation, one-off tasks</li>
+                </ul>
+            </div>
+            <div class="comparison-card profile">
+                <h4>Profiles</h4>
+                <ul>
+                    <li>Persistent — long-lived agent environments</li>
+                    <li>Created with <code>hermes profile create</code></li>
+                    <li>Own memory, sessions, and conversation history</li>
+                    <li>Full toolset (configured per-profile)</li>
+                    <li>Own gateway, cron jobs, and skills</li>
+                    <li>Separate state directory (<code>~/.hermes/profiles/&lt;name&gt;/</code>)</li>
+                    <li>Ideal for: specialized agents, team bots, persistent services</li>
+                </ul>
+            </div>
+        </div>
+
+        <p>
+            The key distinction: <strong>sub-agents are task-level isolation; profiles are identity-level isolation</strong>. Use sub-agents when you want to parallelize work or keep context clean within a single session. Use profiles when you need a completely separate agent with its own personality, memory, and persistent state.
+        </p>
+
+        <p>
+            You can even combine the two: a profile-based agent can spawn its own sub-agents, creating a hierarchy of specialized workers.
+        </p>
+
+        <h2 id="real-world-use-cases">7. Real-World Use Cases</h2>
+
+        <h3>Parallel Research &amp; Synthesis</h3>
+
+        <p>
+            One of the most powerful applications is running multiple research tasks simultaneously. For example, evaluating three different technical approaches to a problem:
+        </p>
+
+        <pre><code>delegate_task(tasks=[
+    {
+        "goal": "Evaluate PostgreSQL tsvector for full-text search in our Django app",
+        "context": "Project uses Django 5.0, PostgreSQL 16. Assess: setup complexity, query capabilities, resource needs, maintenance.",
+        "toolsets": ["web"]
+    },
+    {
+        "goal": "Evaluate Elasticsearch via django-elasticsearch-dsl for our Django app",
+        "context": "Same project. Assess: setup complexity, query capabilities, resource needs, maintenance.",
+        "toolsets": ["web"]
+    },
+    {
+        "goal": "Evaluate Meilisearch via meilisearch-python for our Django app",
+        "context": "Same project. Assess: setup complexity, query capabilities, resource needs, maintenance.",
+        "toolsets": ["web"]
+    }
+])
+# Parent receives 3 independent evaluations and picks the best</code></pre>
+
+        <h3>Multi-Agent Stock Analysis</h3>
+
+        <p>
+            The <code>advanced-stock-analysis</code> skill demonstrates a sophisticated multi-agent debate pattern. Four analyst agents (Fundamental, Technical, Sentiment, Risk) analyze a stock independently, then engage in cross-examination and debate before reaching a consensus:
+        </p>
+
+        <pre><code># Round 1: All 4 analysts work in parallel
+delegate_task(tasks=[
+    {"goal": "Analyze AAPL fundamentals...", "context": "...", "toolsets": ["terminal", "web"]},
+    {"goal": "Analyze AAPL technicals...", "context": "...", "toolsets": ["terminal", "web"]},
+    {"goal": "Analyze AAPL sentiment...", "context": "...", "toolsets": ["terminal", "web"]},
+    {"goal": "Assess AAPL risk...", "context": "...", "toolsets": ["terminal", "web"]}
+])
+# Parent collects results, runs bull vs bear debate, produces consensus</code></pre>
+
+        <h3>Marketing Content Pipeline</h3>
+
+        <p>
+            A 9-task pipeline that goes from audience research through messaging, parallel content creation (landing page, emails, social posts, blog, video script), review, and finalization. The writer tasks (T3-T7) all run in parallel after the messaging framework is established:
+        </p>
+
+        <pre><code># Level 2: Five content pieces written simultaneously
+delegate_task(tasks=[
+    {"goal": "Write landing page copy (≤500 words)", "context": "READ T2_output.md first. Use messaging framework.", "toolsets": ["file"]},
+    {"goal": "Write 3-email launch sequence", "context": "READ T2_output.md first.", "toolsets": ["file"]},
+    {"goal": "Write 6 social posts (LinkedIn, X, Instagram)", "context": "READ T2_output.md first.", "toolsets": ["file"]},
+    {"goal": "Write SEO blog post (1500 words)", "context": "READ T2_output.md first.", "toolsets": ["file"]},
+    {"goal": "Write YouTube Shorts script (60 sec)", "context": "READ T2_output.md first.", "toolsets": ["file"]}
+])</code></pre>
+
+        <h3>Code Review &amp; Security Audit</h3>
+
+        <p>
+            Delegating a security review to a fresh-context sub-agent ensures the reviewer approaches the code without any preconceptions from the parent's earlier analysis:
+        </p>
+
+        <pre><code>delegate_task(
+    goal="Review src/auth/ for security issues and fix any found",
+    context="""Project at /home/user/webapp. Python 3.11, Flask, PyJWT, bcrypt.
+    Auth files: src/auth/login.py, src/auth/jwt.py, src/auth/middleware.py
+    Test command: pytest tests/auth/ -v
+    Focus on: SQL injection, JWT validation, password hashing, session management.
+    Fix issues found and verify tests pass.""",
+    toolsets=["terminal", "file"]
+)</code></pre>
+
+        <h2 id="pitfalls">8. Pitfalls &amp; Best Practices</h2>
+
+        <h3>Pass Explicit Context</h3>
+
+        <p>
+            The number one mistake in sub-agent delegation is under-specifying context. Remember: the sub-agent knows nothing about your conversation. Always include:
+        </p>
+
+        <ul>
+            <li>File paths and project locations</li>
+            <li>Error messages and stack traces (verbatim)</li>
+            <li>Technology stack and versions</li>
+            <li>Constraints and requirements</li>
+            <li>Expected output format and location</li>
+        </ul>
+
+        <h3>Choose the Right Toolset</h3>
+
+        <p>
+            Restrict the sub-agent's toolset to only what it needs. This reduces the attack surface and keeps the sub-agent focused:
+        </p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Toolset Pattern</th>
+                    <th>Use Case</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>["terminal", "file"]</code></td>
+                    <td>Code work, debugging, file editing</td>
+                </tr>
+                <tr>
+                    <td><code>["web"]</code></td>
+                    <td>Research, fact-finding, documentation lookup</td>
+                </tr>
+                <tr>
+                    <td><code>["terminal"]</code></td>
+                    <td>Running tests, builds, deployments</td>
+                </tr>
+                <tr>
+                    <td><code>["file"]</code></td>
+                    <td>Reading/writing files without terminal access</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>Don't Delegate What You Can Do Directly</h3>
+
+        <p>
+            Sub-agent delegation has overhead. Don't delegate tasks that are better handled directly:
+        </p>
+
+        <ul>
+            <li><strong>Single tool call</strong> — use the tool directly</li>
+            <li><strong>Mechanical multi-step work</strong> — use <code>execute_code</code></li>
+            <li><strong>Tasks needing user interaction</strong> — sub-agents can't use <code>clarify</code></li>
+            <li><strong>Quick file edits</strong> — do them directly in the parent</li>
+            <li><strong>Durable long-running work</strong> — use cron jobs or background terminals</li>
+        </ul>
+
+        <h3>Handle Interruptions Gracefully</h3>
+
+        <p>
+            Since <code>delegate_task</code> is synchronous, interrupting the parent cancels all active children. For critical work, consider saving intermediate results to the shared workspace so they can be resumed.
+        </p>
+
+        <h2 id="conclusion">9. Conclusion</h2>
+
+        <p>
+            Hermes Agent's sub-agent delegation system is a powerful mechanism for scaling AI agent capabilities beyond the limits of a single context window. By spawning isolated child agents that work in parallel and return only their final summaries, the parent agent can orchestrate complex workflows without drowning in intermediate data.
+        </p>
+
+        <p>
+            The key principles to remember are:
+        </p>
+
+        <ol>
+            <li><strong>Context is king</strong> — always pass everything the sub-agent needs explicitly</li>
+            <li><strong>Isolation is the feature</strong> — fresh context means unbiased, focused work</li>
+            <li><strong>Parallelism is free</strong> — independent tasks should always run concurrently</li>
+            <li><strong>Keep it simple</strong> — don't delegate what you can do directly</li>
+            <li><strong>Use the right tool</strong> — sub-agents for task isolation, profiles for identity isolation</li>
+        </ol>
+
+        <p>
+            Whether you're running parallel research, orchestrating a multi-step content pipeline, or conducting a multi-agent debate on stock analysis, <code>delegate_task</code> gives you the primitives to build sophisticated agent workflows that stay clean, fast, and focused.
+        </p>
+
+        <div class="callout success">
+            <div class="callout-title">Learn More</div>
+            <p>
+                Explore the full documentation at <a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/delegation">hermes-agent.nousresearch.com</a>
+                and check out the <code>multi-agent-pipeline</code> and <code>advanced-stock-analysis</code> skills for complete working examples.
+            </p>
+        </div>
+
+    </article>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>
+            Published by the Hermes Agent team &middot;
+            <a href="https://hermes-agent.nousresearch.com">hermes-agent.nousresearch.com</a> &middot;
+            Built with <a href="https://github.com/NousResearch/hermes-agent">Hermes Agent</a>
+        </p>
+    </footer>
+</div>
+
+</body>
+</html>
