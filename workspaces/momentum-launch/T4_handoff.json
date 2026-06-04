@@ -1,0 +1,12 @@
+{
+  "task_id": "T4",
+  "status": "complete",
+  "summary": "Wrote a 3-email launch sequence for Momentum based on the T2 messaging framework. Email 1 (Hook) leads with the problem of rigid habit trackers and streak shame. Email 2 (Demo) walks through a real day with Momentum's energy-adaptive scheduling. Email 3 (Close) delivers urgency with a 30-day streak starter offer. All emails use the grounded, humanizing, precise tone from T2. Each email is under 150 words in body copy.",
+  "output_file": "T4_output.md",
+  "metadata": {
+    "format": "email_sequence",
+    "word_count": 580,
+    "emails": 3,
+    "tone_check": "PASS"
+  }
+}

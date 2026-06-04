@@ -1,0 +1,11 @@
+{
+  "task_id": "T3",
+  "status": "complete",
+  "summary": "Wrote landing page copy for Momentum based on T2 messaging framework. Includes hero headline (10 words), subheadline (19 words), one-liner pitch, 3 feature highlights (each under 15 words), social proof placeholder, and primary CTA. Tone is warm, encouraging, and science-backed. All copy uses the problem statement (rigid streaks cause abandonment), differentiators (energy-adaptive scheduling, keystone focus, pattern insights), and voice guidelines (grounded, humanizing, precise) from T2. No filler phrases. Total word count: ~180 words of copy (well under 500 max).",
+  "output_file": "T3_output.md",
+  "metadata": {
+    "format": "landing_page",
+    "word_count": 180,
+    "tone_check": "PASS"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "task_id": "T2",
+  "status": "complete",
+  "summary": "Defined the complete messaging and positioning framework for Momentum based on T1 audience research. Established problem statement grounded in the 92% habit failure rate and streak shame data. Crafted positioning statement targeting energy-frustrated professionals. Identified 3 specific, defensible differentiators: (1) Energy-Adaptive Scheduling vs. static streaks, (2) Keystone Focus vs. feature overload, (3) Pattern Insights vs. surface-level tracking. Produced a one-liner that passes the 'so what?' test. Provided voice guidelines (Grounded, Humanizing, Precise), competitive positioning matrix, and what-we-NOT claims to prevent downstream messaging drift.",
+  "output_file": "T2_output.md",
+  "metadata": {
+    "positioning_statement": "For ambitious professionals who keep abandoning habit trackers because rigid streaks punish natural energy dips, Momentum is the AI habit coach that adapts your daily plan to your real energy patterns -- so you stay consistent without the guilt.",
+    "one_liner": "The habit tracker that bends instead of breaking when your energy does.",
+    "differentiators": [
+      "Energy-Adaptive Scheduling: Reads energy signals and adjusts daily habit plan in advance with sliding-scale targets instead of binary streak shaming",
+      "Keystone Focus: Actively limits users to 2-3 keystone habits with AI-enforced focus, preventing habit hoarding and cognitive overload that causes app abandonment",
+      "Pattern Insights: Surfaces cause-and-effect correlations (e.g., sleep → exercise likelihood) so users understand why consistency works, not just whether they did it"
+    ],
+    "grounded_in": "T1 research findings: streak shame as #1 abandonment reason (Reddit threads), energy variability as primary failure driver (r/getdisciplined, Routinery Blog), feature overload contributing to early churn (Moore Momentum Blog), 92% habit attempt failure rate within 60 days (360 Research Reports)"
+  }
+}

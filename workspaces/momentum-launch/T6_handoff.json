@@ -1,0 +1,12 @@
+{
+  "task_id": "T6",
+  "status": "complete",
+  "summary": "Wrote a 1500-word SEO-optimized blog post for Momentum targeting 'best habit tracker app 2026' and 'AI habit tracker'. Post follows T2 messaging framework throughout: opens with the problem of rigid habit trackers and streak shame (92% failure rate), introduces Momentum's energy-adaptive scheduling, explains the 3-step workflow (keystone habits, AI pattern reading, adjusted daily plan), includes a 7-row comparison table vs Streaks/Habitica/Todoist/Tracka.ai, covers the behavioral science foundation, and closes with a CTA block for the free trial. Tone is grounded, humanizing, and precise per T2 voice guidelines.",
+  "output_file": "T6_output.md",
+  "metadata": {
+    "format": "blog_post",
+    "word_count": 1510,
+    "seo_keywords": ["best habit tracker app 2026", "AI habit tracker"],
+    "tone_check": "PASS"
+  }
+}

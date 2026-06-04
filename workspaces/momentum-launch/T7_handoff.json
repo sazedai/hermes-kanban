@@ -1,0 +1,11 @@
+{
+  "task_id": "T7",
+  "status": "complete",
+  "summary": "Wrote a 60-second YouTube launch script for Momentum based on the T2 messaging framework. The script follows the required 5-part structure: Hook (3s, problem-first with streak shame), What is Momentum (10s, energy-adaptive concept demo), How it Works (20s, 3-step walkthrough covering all three differentiators), Why it Adapts (15s, pattern insights with specific data), and CTA (12s, subscribe + link in bio). Includes [ON CAMERA] / [VOICEOVER] labels, on-screen text cues, approximate timings, production notes, and a T2 messaging compliance checklist. Tone is energetic, relatable, and confident throughout.",
+  "output_file": "T7_output.md",
+  "metadata": {
+    "format": "youtube_script",
+    "duration_seconds": 60,
+    "tone_check": "PASS"
+  }
+}

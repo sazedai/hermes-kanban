@@ -1,0 +1,27 @@
+{
+  "task_id": "T5",
+  "status": "complete",
+  "summary": "Wrote 6 social posts (2 per platform) for the Momentum launch, grounded in the T2 messaging framework. Platforms: LinkedIn (professional, insight-first, ends with question/CTA), X/Twitter (hook-first, <280 chars each), Instagram (casual, emoji-friendly, visual-first framing with carousel recommendations). All posts use the energy-adaptive scheduling differentiator and avoid generic AI-powered claims.",
+  "output_file": "T5_output.md",
+  "metadata": {
+    "format": "social_posts",
+    "post_count": 6,
+    "platforms": ["LinkedIn", "X", "Instagram"],
+    "tone_check": "PASS",
+    "posts_detail": {
+      "linkedin_1": "Introduce Momentum — problem/solution: 92% failure rate, rigid streaks punish humans, energy-adaptive scheduling",
+      "linkedin_2": "Pattern-insights differentiator — data-led, cause-and-effect correlations (sleep → exercise), no generic AI claims",
+      "x_1": "278 chars — hook on 92% failure rate, contrasts binary streaks with Momentum's adaptive approach",
+      "x_2": "274 chars — keystone habit focus (2-3 habits) vs. habit hoarding (15 parallel trackers)",
+      "instagram_1": "Energy-adaptive hero — casual tone, 3-panel carousel visual concept, encouraging CTA",
+      "instagram_2": "Contrast with rigid apps — problem/solution carousel meme format, human-first language, anti-guilt framing"
+    },
+    "message_alignment": {
+      "problem_statement": "USED — 92% failure rate, rigid streaks punish natural energy dips",
+      "differentiator_1": "USED — Energy-Adaptive Scheduling (all 6 posts)",
+      "differentiator_2": "USED — Keystone Focus (X Post 2, Instagram Post 2)",
+      "differentiator_3": "USED — Pattern Insights (LinkedIn Post 2)",
+      "tonal_guidelines": "PASS — grounded, humanizing, precise (no hype-y claims, no generic AI buzzwords)"
+    }
+  }
+}

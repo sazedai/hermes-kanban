@@ -1,0 +1,52 @@
+{
+  "task_id": "T8",
+  "status": "complete",
+  "review_result": "REQUEST_REVISIONS",
+  "issues_found": 5,
+  "blocking_issues": [
+    {
+      "id": "B1",
+      "file": "T4_output.md",
+      "issue": "Email 3 uses streak-centric offer language that contradicts T2 positioning",
+      "details": "Subject line 'Start your streak this week', body copy '30-day streak starter', and CTA 'Start Your Streak' all make streaks the core of the offer. T2 explicitly states: 'Streaks as a primary feature... we never make them the core feedback loop.'",
+      "suggested_fix": "Rename offer to '30-day energy-adaptive trial', change CTA to 'Start Free Trial' (consistent with T3), change subject line to 'Your free trial expires Sunday' or similar."
+    },
+    {
+      "id": "B2",
+      "file": "T4_output.md vs T6_output.md",
+      "issue": "Trial duration contradiction between email and blog",
+      "details": "T4 Email 3 says '30-day streak starter' (30 days free). T6 Blog line 93 says 'free to try for 14 days.' Users will encounter conflicting information.",
+      "suggested_fix": "Confirm actual trial length with product team, then update both files to match. If 30 days: change T6 to 'free to try for 30 days.' If 14 days: change T4 references from '30-day' to '14-day.'"
+    }
+  ],
+  "non_blocking_issues": [
+    {
+      "id": "N1",
+      "file": "T6_output.md",
+      "issue": "'AI habit tracker' used as recurring descriptor approaches headline-level AI branding",
+      "details": "T2 guidance says 'Avoid AI as the headline. Lead with the outcome and use AI as supporting detail.' Blog uses 'the AI habit tracker that adapts' and 'the AI habit tracker that actually understands' multiple times.",
+      "suggested_fix": "Replace some instances with 'Momentum' or 'the app' to reduce AI-branding emphasis. Keep one reference to AI mechanism in How It Works section."
+    },
+    {
+      "id": "N2",
+      "file": "T6_output.md",
+      "issue": "Typo: 'pass-freak mechanics' on line 23",
+      "suggested_fix": "Change to 'pass/fail mechanics.'"
+    },
+    {
+      "id": "N3",
+      "file": "T4_output.md",
+      "issue": "'Consistency score: 87%' metric not established in T2 framework",
+      "details": "Email 2 introduces a specific metric that may not exist in the actual app.",
+      "suggested_fix": "Confirm metric exists in app. If not, change to general statement like 'You kept your momentum alive.'"
+    }
+  ],
+  "suggested_fixes": [
+    "Rewrite T4 Email 3 subject line, offer name, and CTA to remove streak-centric language",
+    "Reconcile trial duration between T4 (currently 30 days) and T6 (currently 14 days)",
+    "Reduce 'AI habit tracker' as a recurring descriptor in T6 blog post",
+    "Fix 'pass-freak' typo in T6 line 23",
+    "Validate 'consistency score' metric in T4 Email 2"
+  ],
+  "summary": "Strong consistency across 5 content pieces. Problem statement, differentiators, and one-liner usage are correct throughout. Tone is platform-appropriate and on-brand in 4 of 5 pieces. Two blocking issues: T4 Email 3 contradicts T2's anti-streak-primary rule, and T4/T6 contradict on trial length. Three minor fixes recommended."
+}
